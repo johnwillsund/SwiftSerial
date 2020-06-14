@@ -250,7 +250,10 @@ public class SerialPort {
     #if os(Linux)
         fileDescriptor = open(path, readWriteParam | O_NOCTTY)
     #elseif os(OSX)
-        fileDescriptor = open(path, readWriteParam | O_NOCTTY | O_EXLOCK)
+        guard let encodedPath = path.cString(using: .ascii) else {
+            throw PortError.invalidPath
+        }
+        fileDescriptor = open(encodedPath, readWriteParam | O_NOCTTY | O_EXLOCK | O_NONBLOCK)
     #endif
 
         // Throw error if open() failed
